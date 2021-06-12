@@ -127,3 +127,24 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Files directory
+Files/items.csv
+Files/stats.csv
+files/accounts.json
+files/tasks.json
+files/proxy.json
+files/log.csv
+
+# Pictures directory
+Images/
+TestImages/
+
+# Data directory
+Data/
+
+# Selenium Chromedriver
+chromedriver_win32/
+
+# Pretrained bot
+yolo.h5
