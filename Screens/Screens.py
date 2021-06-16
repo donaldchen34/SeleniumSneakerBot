@@ -149,7 +149,7 @@ class TasksScreen(Screen):
         task_info.add_widget(proxies)
 
         #Time
-        time,time_text = createForm("Time")
+        time,time_text = createForm("Time, Enter 00:00 - 23:59")
         task_info.add_widget(time)
 
         #Confirm Button

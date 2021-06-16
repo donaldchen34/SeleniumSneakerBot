@@ -58,9 +58,6 @@ class GUI(App):
         self.sm.add_widget(proxy_screen)
         self.sm.add_widget(log_screen)
 
-    def test(self):
-        print("AHH")
-
 
 if __name__ == "__main__":
 

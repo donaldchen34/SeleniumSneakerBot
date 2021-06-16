@@ -4,6 +4,9 @@ import csv
 from FilePaths import ACCOUNTS_FILE,STATS_FILE,SITES_FILE,ITEMS_FILE, \
     PROXY_FILE, TASKS_FILE, LOGS_FILE
 
+#Todo
+#addTasksdata(data): Fix indenting in save to make more prettier
+
 #Tasks
 #Returns task.json
 def getTasksData():

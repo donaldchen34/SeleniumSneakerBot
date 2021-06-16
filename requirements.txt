@@ -1,0 +1,6 @@
+Kivy == 2.0.0
+selenium == 3.141.0
+Pillow == 7.0.0
+imageai == 2.1.6
+h5py == 2.10.0
+numpy == 1.19.3
