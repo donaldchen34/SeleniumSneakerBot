@@ -143,8 +143,10 @@ TestImages/
 # Data directory
 Data/
 
-# Selenium Chromedriver
+# Selenium Webdrivers
 chromedriver_win32/
+geckodriver/
+geckodriver.log
 
 # Pretrained bot
 yolo.h5

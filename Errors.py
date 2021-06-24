@@ -4,6 +4,16 @@ class Error(Exception):
 #Make all the Errors under TaskErrors
 class CaptchaError(Error):
     """
+    Raised when a captcha appears
+    Used for manual captcha handler to pass captcha links
+    """
+    def __init__(self,message,link,driver):
+        self.message = message
+        self.link = link
+        self.driver = driver
+
+class LoadCaptchaError(Error):
+    """
     Raised when there is an issue during the Captcha phase
     """
 

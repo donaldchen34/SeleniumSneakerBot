@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from files.states import states
@@ -13,20 +13,31 @@ import time
 import json
 from files.CaptchaWords import captchawords
 import ReadData
-from Errors import CaptchaError, CheckOutError, ImageError, XPathError
+from Errors import CaptchaError, LoadCaptchaError, CheckOutError, ImageError, XPathError
+from FilePaths import SITES_FILE, FIREFOX_WEB_DRIVER_PATH
 
-from CreateDataFiles import SITES_FILE
-
-WEB_DRIVER_PATH = "chromedriver_win32/chromedriver.exe"
+#Todo
+#Finish CaptchaHandler()
+#More Error Catching or None to be more efficient????
+#Train NN
+#Make it compatible with other footsites
+#Go to Footsite.buy() and Footsite.captchahandler()
+#BUG FIXING
+#Sold out Error
+#Read through comments to fix issues
+#Comments and Clean Up
 
 class FootSite:
-    def __init__(self):
-        # Keep chrome driver open after function is finished
-        chrome_options = Options()
-        chrome_options.add_experimental_option("detach", True)
+    def __init__(self,driver = None):
+        """
+        :param driver: selenium webdriver, default is None
+        """
 
+        ffprofile = FirefoxProfile()
+        ffprofile.set_preference("dom.webdriver.enabled",False)
+        #https://stackoverflow.com/questions/43908995/how-to-disabling-notification-using-selenium-for-firefox-browser
         # Set up driver
-        self.driver = webdriver.Chrome(WEB_DRIVER_PATH, options=chrome_options)
+        self.driver = driver if driver else webdriver.Firefox(executable_path= FIREFOX_WEB_DRIVER_PATH,firefox_profile=ffprofile)
         self.driver.maximize_window()
 
         self.captcha_solver = CaptchaSolver()
@@ -93,8 +104,9 @@ class FootSite:
         """
         :return: returns if html/body is clickable
         """
+
         try:
-            self.driver.find_element_by_xpath('/html/body/div[1]')
+            self.driver.find_element_by_xpath('//*[@id="dataDomeCaptcha"]')
             return True
         except:
             return False
@@ -107,7 +119,7 @@ class FootSite:
         - intro mailing lists in the middle
         :return: None
 
-        Can change try/except blocks to if find driver or driver.exists() -> then close
+        Can change try/except blocks to if find driver or driver.exists() -> then close -> might be less costly
         """
 
         try:
@@ -123,6 +135,12 @@ class FootSite:
             pass
 
         try:
+            """
+            if site == "footlocker": #Need to be more adaptive -> PLS UNHARDCODE T.T
+                WebDriverWait(self.driver, 10).until(expected_conditions.visibility_of_element_located
+                                                     ((By.XPATH, '//*[@id="bluecoreEmailCaptureForm"]')))
+            """
+
             mailing_list = self.driver.find_element_by_xpath(
                 '//*[@id="bluecoreEmailCaptureForm"]/div/div[2]/div[11]/button/img')
             mailing_list.click()
@@ -130,6 +148,8 @@ class FootSite:
             pass
 
 
+
+    ### OUTDATED ###
     # TODO
     # Test with other sites
     # Train NN for better accuracy
@@ -152,7 +172,7 @@ class FootSite:
             WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable
                                                  ((By.XPATH, '//*[@id="captcha-submit"]')))
         except:
-            raise CaptchaError("Failed to switch to Captcha IFrame")
+            raise LoadCaptchaError("Failed to switch to Captcha IFrame")
 
         one_click_button = self.driver.find_element_by_xpath('//*[@id="captcha-submit"]')
         one_click_button.click()
@@ -164,8 +184,7 @@ class FootSite:
             captcha_challenge_iframe = self.driver.find_element_by_xpath('/html/body/div[2]/div[4]/iframe')
             self.driver.switch_to.frame(captcha_challenge_iframe)
         except:
-            #UPDATE GUI STATUS HERE
-            raise CaptchaError("Failed to switch to captcha challenge iframe")
+            raise LoadCaptchaError("Failed to switch to captcha challenge iframe")
 
         # Repeat until captcha is closed
         # One loop with loop until there are no more pictures that match the target_field
@@ -182,7 +201,7 @@ class FootSite:
                                                        '//*[@id="rc-imageselect"]/div[2]/div[1]/div[1]/div/strong')))
             except:
                 print("Could not get target word error")
-                raise CaptchaError("Failed to get target word")
+                raise LoadCaptchaError("Failed to get target word")
                 break
 
 
@@ -409,6 +428,7 @@ class FootSite:
         # place_order.submit()
         print(place_order.text)
 
+    ### OUTDATED ###
     # Save images
     def saveImages(self,target):
 
@@ -450,7 +470,29 @@ class FootSite:
                 # Save squares into /Pictures to be manually classified
                 new_img.save("Images/{}_image.png".format(sizeOfImagesFolder()))
 
+    #Used for manual puzzle slider captca
+    def manualPuzzleSolver(self):
+
+        try:
+            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable
+                                                 ((By.XPATH, '//*[@id="dataDomeCaptcha"]')))
+
+            link = self.driver.find_element_by_xpath('//*[@id="dataDomeCaptcha"]')
+            link = link.get_attribute('src')
+
+        except:
+            self.driver.quit()
+            raise LoadCaptchaError("Failed to load Manual Puzzle Solver Captcha")
+        else:
+            print("footsite")
+            #self.driver.close()
+
+            raise CaptchaError(message="Manual Puzzle Solver",link=link,driver = self.driver)
+
+
+    ### OUTDATED ###
     # Save images from Captcha and then manually click Captcha
+    # Used for manual choose pictures captcha
     def manualCaptchaHandler(self):
         #There are no raise errors because manualCaptchaHandler() can be called
         # from different steps of bot
@@ -463,16 +505,33 @@ class FootSite:
             ### One click
             # Add switch to one click iframe for more consistency -> Not sure if it will work
             self.driver.switch_to.frame("dataDomeCaptcha")
+            """
+            #V1 - Click on Captcha Box
             WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable
                                                  ((By.XPATH, '//*[@id="captcha-submit"]')))
-
+                                                 
             one_click_button = self.driver.find_element_by_xpath('//*[@id="captcha-submit"]')
             one_click_button.click()
+            """
+
+            #V2 New Capctha
+
+            #Grab Link to button -> Dont need to click
+
+            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable
+                                                 ((By.XPATH, '//*[@id="1e505deed3832c02c96ca5abe70df9ab"]/div/div[2]/div[1]/div[3]'
+                                                             '')))
+
+            one_click_button = self.driver.find_element_by_xpath('//*[@id="1e505deed3832c02c96ca5abe70df9ab"]/div/div[2]/div[1]/div[3]')
+            one_click_button.click()
+
 
             # Add a check incase selection is skipped
             #### Selection Captcha
         except:
+            print("No One Click")
             pass
+
 
         try:
             WebDriverWait(self.driver, 10).until(expected_conditions.visibility_of_element_located
@@ -550,6 +609,7 @@ class FootSite:
 
         # Go to footsite
 
+
         url = self.createURL(site, product_num)
         self.driver.get(url)
 
@@ -563,6 +623,7 @@ class FootSite:
 
         time.sleep(1)
         self.closePopups()
+
         avail = self.getAvailableSizes()
 
         size = size.replace('.', '')
@@ -591,9 +652,9 @@ class FootSite:
 
                 # Needs work - Doesnt work with eastbay, Sorta catches it with footlocker and footaction
                 # Test with other sites
-                self.captchaHandler()
-
-                #self.manualCaptchaHandler()
+                #self.captchaHandler() #Auto Captchahandler for picture choosing
+                #self.manualCaptchaHandler() #Manual Captchahandler for picture choosing
+                self.manualPuzzleSolver() #Manual CaptchaHandler for puzzle slider
 
             print('Finished Captcha')
 

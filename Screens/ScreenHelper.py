@@ -6,7 +6,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.dropdown import DropDown
 from kivy.uix.textinput import TextInput
 from kivy.uix.recyclegridlayout import RecycleGridLayout
-
+import webbrowser
 
 #Root Box Layout for screens - Contains a toolbar
 class RootWidget(BoxLayout):
@@ -36,6 +36,10 @@ class ToolBar(BoxLayout):
         proxy.bind(on_press = self.proxyButton)
         self.add_widget(proxy)
 
+        captcha = Button(text="Captchas")
+        captcha.bind(on_press = self.captchaButton)
+        self.add_widget(captcha)
+
         log = Button(text="Log")
         log .bind(on_press = self.logButton)
         self.add_widget(log)
@@ -48,6 +52,9 @@ class ToolBar(BoxLayout):
 
     def proxyButton(self, instance):
         instance.parent.parent.parent.parent.current = "proxy"
+
+    def captchaButton(self, instance):
+        instance.parent.parent.parent.parent.current = "captcha"
 
     def logButton(self, instance):
         instance.parent.parent.parent.parent.current = "log"

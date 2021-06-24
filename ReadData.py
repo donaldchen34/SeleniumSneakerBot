@@ -4,8 +4,7 @@ import csv
 from FilePaths import ACCOUNTS_FILE,STATS_FILE,SITES_FILE,ITEMS_FILE, \
     PROXY_FILE, TASKS_FILE, LOGS_FILE
 
-#Todo
-#addTasksdata(data): Fix indenting in save to make more prettier
+
 
 #Tasks
 #Returns task.json
@@ -100,7 +99,7 @@ def getLogData(rows):
         return log_header,data
 
 def addLog(data):
-    with open(LOGS_FILE, 'a') as log_file:
+    with open(LOGS_FILE, 'a', newline='') as log_file:
         writer = csv.writer(log_file)
         writer.writerow(data)
 
