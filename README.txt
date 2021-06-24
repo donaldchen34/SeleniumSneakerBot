@@ -1,6 +1,9 @@
 Setup
 
--Install selenium chromdriver and move it into main directory
+DOES NOT WORK
+
+***No Longer uses chromedriver
+-Install selenium chromedriver and move it into main directory
 https://chromedriver.chromium.org/downloads
 
 -Install selenium mozilla firefox driver and move it into main directory
